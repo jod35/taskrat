@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, toRef } from 'vue';
 
 
 const state = reactive(
   {
-    text: "",
+    title: "",
+    detail: "",
     todoItems: [],
     checked: false
   }
@@ -12,16 +13,17 @@ const state = reactive(
 
 
 function submitForm() {
-  if (state.text === "") {
-    alert("Both text and public must be submitted");
+  if (state.title === "") {
+    alert("Title text should not be left out");
   }
   else {
-    console.log(`Adding ${state.text}`)
-    state.todoItems.push({ text: state.text, public: false, id: state.todoItems.length + 1 })
+    console.log(`Adding ${state.title}`)
+    state.todoItems.push({ title: state.title, detail: state.detail, public: false, id: state.todoItems.length + 1 })
     console.log(`todoItems ${JSON.stringify(state.todoItems)}`)
 
   }
-  state.text = ""
+  state.title = ""
+  state.detail = ""
   state.checked = false
 }
 
@@ -37,41 +39,68 @@ function deteTodo(todoId) {
   state.todoItems = state.todoItems.filter(t => t.id != todoId)
 }
 
+function resetAllTodos() {
+  state.todoItems = []
+}
+
 
 const allTodosCount = computed(() => { return state.todoItems.length })
 const completeTodosCount = computed(() => { return state.todoItems.filter((a) => a.public === true).length })
 const incompleteTodosCount = computed(() => { return state.todoItems.filter((a) => a.public === false).length })
+const postsExit = computed(() => { return state.todoItems.length > 0 })
 </script>
 
 <template>
-  <header>
-    <h1>To Do Tasks ({{ allTodosCount }})</h1>
-    <p>Incomplete Task: {{ incompleteTodosCount }} <span class="complete">Complete tasks: {{ completeTodosCount }}
-      </span></p>
-  </header>
-  <div class="todo-container">
-    <aside>
-      <h2>Add Task</h2>
-      <form @submit.prevent="submitForm">
-        <div class="form-group">
-          <label for="text">Text: </label>
-          <input type="text" name="text" id="text" v-model="state.text" class="form-control">
+  <div class="container">
+    <header>
+      <nav>
+        <div class="nav-wrapper">
+          <a href="#" class="brand-logo">To Do Tasks ({{ allTodosCount }})</a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="#" class="font-weight-bold">Incomplete Task: {{ incompleteTodosCount }}</a></li>
+            <li><a href="#" class="font-weight-bold">Complete tasks: {{ completeTodosCount }}</a></li>
+          </ul>
         </div>
-        <div class="form-group"><input type="submit" value="Add Item "></div>
-      </form>
-    </aside>
-    <main>
-      <div class="todo-items" v-if="state.todoItems">
-        <div v-for="todo in state.todoItems" :key="todo" :class="[todo.public ? 'complete-border': 'todo-item']">
-          <p :class="{ done: todo.public }">{{ todo.text }}</p>
-          <div class="todo-options">
-            <input type="checkbox" name="public" id="public" :checked="todo.public" @change="updateTodo(todo.id)" class="todo-complete">
-            <input type="button" value="x" @click="deteTodo(todo.id)" class="todo-delete">
+      </nav>
+    </header>
+    <div class="row mt-2">
+      <aside class="col l3 m12 s12">
+        <h3>Add Task</h3>
+        <form @submit.prevent="submitForm">
+          <div class="input-field col s12">
+            <label for="text">Title: </label>
+            <input type="text" name="text" id="text" v-model="state.title" class="form-control">
+          </div>
+          <div class="input-field col s12">
+            <label for="detail">Detail: </label>
+            <textarea name="detail" id="detail" class="materialize-textarea" v-model="state.detail"></textarea>
+          </div>
+          <div class="input-field col s12">
+            <input type="submit" value="Add Item " class="btn red">
+            <input type="button" value="Reset List" class="btn blue ml-2" @click="resetAllTodos">
+          </div>
+        </form>
+      </aside>
+      <main class="col l9 m12 s12">
+
+        <div class="todo-items" v-if="postsExit">
+          <div v-for="todo in state.todoItems" :key="todo" :class="[todo.public ? 'card red' : 'card white']">
+            <div class="card-content">
+              <p :class="[todo.public ? 'white-text' : '', 'card-title', 'font-weight-bold']">{{ todo.title }}</p>
+              <p :class="[todo.public ? 'white-text' : '']">{{ todo.detail }}</p>
+            </div>
+
+            <div class="card-action">
+              <a @click="updateTodo(todo.id)" :class="[todo.public ? 'text-red' : 'text-yellow', 'cursor-pointer']">{{
+                todo.public ?
+                  "Done" : "Mark as Done" }}</a>
+              <a @click="deteTodo(todo.id)" class="cursor-pointer">Delete</a>
+            </div>
           </div>
         </div>
-      </div>
-      <p v-else>No todoItems yet</p>
-    </main>
+        <h3 v-else align="center" class="mt-2">No todo Items yet</h3>
+      </main>
+    </div>
   </div>
 
 </template>
@@ -79,112 +108,19 @@ const incompleteTodosCount = computed(() => { return state.todoItems.filter((a) 
 
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-   font-family: "Valley Sans", sans-serif;
-  font-optical-sizing: auto;
+.mt-2 {
+  margin-top: 20px;
 }
 
-header {
-  height: 10vh;
-  display: flex;
-  justify-content: space-between;
-  padding: 15px;
+.cursor-pointer {
+  cursor: pointer;
 }
 
-header p {
-  margin-top: 10px;
+.font-weight-bold {
   font-weight: bold;
 }
 
-.done {
-  color: red;
-  text-decoration: line-through;
-}
-
-.complete {
-  color: red;
-}
-
-.complete-border{
-  border: 1px solid red;
-  padding: 0.5rem;
-  min-height: 1.0rem;
-  border-radius: 5px;
-}
-
-.todo-container{
-    display: flex;
-    gap: 1rem;
-    width: 100%;
-    margin-top:0.5rem ;
-}
-
-aside{
-  flex: 2;
-  height: 100vh;
-  padding: 1rem;
-}
-
-main{
-  flex: 8;
-}
-.form-group{
-  margin-top: 1.2rem;
-}
-.form-control{
-  background-color: #fff;
-  padding: 0.8rem;
-  width: 100%;
-  border: none;
-  background-color: #e8e6e6;
-  margin-top: 0.5em;
-  border-radius: 5px;
-}
-.todo-items{
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-}
-
-.todo-item{
-  padding: 0.5rem;
-  min-height: 1.0rem;
-  border: 0.05rem solid #000;
-  border-radius: 5px;
-}
-.todo-options{
-  margin-top: 0.5rem;
-  display: flex;
-  gap: 1rem;
-}
-
-.todo-complete{
-  transform: scale(1.5);
-}
-
-.todo-delete{
-  padding: 8px;
-  border: none;
-  color: white;
-  background-color: red;
-  border-radius: 7px;
-}
-@media (max-width: 768px) {
-    .todo-container {
-        flex-direction: column;
-    }
-
-    aside,
-    main {
-        width: 100%;
-    }
-
-    header{
-      flex-direction: column;
-    }
+.ml-2 {
+  margin-left: 15px;
 }
 </style>
