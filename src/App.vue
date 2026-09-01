@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, reactive, toRef } from 'vue';
 
+import Header from './components/Header.vue';
+import TodoListItem from './components/TodoListItem.vue';
+
 
 const state = reactive(
   {
@@ -34,7 +37,7 @@ function updateTodo(todoId) {
   todo.public = !todo.public
 }
 
-function deteTodo(todoId) {
+function deleteTodo(todoId) {
   console.log(`Todo ID ${todoId}`)
   state.todoItems = state.todoItems.filter(t => t.id != todoId)
 }
@@ -51,20 +54,12 @@ const postsExit = computed(() => { return state.todoItems.length > 0 })
 </script>
 
 <template>
-  <div class="container">
-    <header>
-      <nav>
-        <div class="nav-wrapper">
-          <a href="#" class="brand-logo">To Do Tasks ({{ allTodosCount }})</a>
-          <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="#" class="font-weight-bold">Incomplete Task: {{ incompleteTodosCount }}</a></li>
-            <li><a href="#" class="font-weight-bold">Complete tasks: {{ completeTodosCount }}</a></li>
-          </ul>
-        </div>
-      </nav>
-    </header>
-    <div class="row mt-2">
-      <aside class="col l3 m12 s12">
+  <div>
+    <Header logo-text="Todo List" :all-todos-count="allTodosCount" :complete-todos-count="completeTodosCount"
+      :incomplete-todos-count="incompleteTodosCount"> </Header>
+
+    <div class="row mt-2 container">
+      <aside class="col l4 m12 s12">
         <h3>Add Task</h3>
         <form @submit.prevent="submitForm">
           <div class="input-field col s12">
@@ -81,22 +76,13 @@ const postsExit = computed(() => { return state.todoItems.length > 0 })
           </div>
         </form>
       </aside>
-      <main class="col l9 m12 s12">
+      <main class="col l8 m12 s12">
 
         <div class="todo-items" v-if="postsExit">
-          <div v-for="todo in state.todoItems" :key="todo" :class="[todo.public ? 'card red' : 'card white']">
-            <div class="card-content">
-              <p :class="[todo.public ? 'white-text' : '', 'card-title', 'font-weight-bold']">{{ todo.title }}</p>
-              <p :class="[todo.public ? 'white-text' : '']">{{ todo.detail }}</p>
-            </div>
-
-            <div class="card-action">
-              <a @click="updateTodo(todo.id)" :class="[todo.public ? 'text-red' : 'text-yellow', 'cursor-pointer']">{{
-                todo.public ?
-                  "Done" : "Mark as Done" }}</a>
-              <a @click="deteTodo(todo.id)" class="cursor-pointer">Delete</a>
-            </div>
-          </div>
+          <TodoListItem v-for="todo in state.todoItems" :todo="todo" :key="todo.id" :public="todo.public" :id="todo.id" :title="todo.title"
+            :detail="todo.detail" :update-func="() => updateTodo(todo.id)"
+            :delete-func="() => deleteTodo(todo.id)">
+          </TodoListItem>
         </div>
         <h3 v-else align="center" class="mt-2">No todo Items yet</h3>
       </main>
