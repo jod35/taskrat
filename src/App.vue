@@ -3,6 +3,7 @@ import { ref, computed, reactive, toRef } from 'vue';
 
 import Header from './components/Header.vue';
 import TodoListItem from './components/TodoListItem.vue';
+import Pagination from './components/Pagination.vue';
 
 
 const state = reactive(
@@ -10,7 +11,9 @@ const state = reactive(
     title: "",
     detail: "",
     todoItems: [],
-    checked: false
+    checked: false,
+    itemsPerPage: 5,
+    currentPage: 1
   }
 )
 
@@ -46,11 +49,20 @@ function resetAllTodos() {
   state.todoItems = []
 }
 
+// reversed rendered list
+const reversedTodos = computed(() => { return [...state.todoItems].reverse() })
 
+// counts
 const allTodosCount = computed(() => { return state.todoItems.length })
 const completeTodosCount = computed(() => { return state.todoItems.filter((a) => a.public === true).length })
 const incompleteTodosCount = computed(() => { return state.todoItems.filter((a) => a.public === false).length })
-const postsExit = computed(() => { return state.todoItems.length > 0 })
+
+// check if todos exist
+const todosExit = computed(() => { return state.todoItems.length > 0 })
+
+//pagination
+
+
 </script>
 
 <template>
@@ -75,16 +87,21 @@ const postsExit = computed(() => { return state.todoItems.length > 0 })
             <input type="button" value="Reset List" class="btn blue ml-2" @click="resetAllTodos">
           </div>
         </form>
+
+
       </aside>
       <main class="col l8 m12 s12">
 
-        <div class="todo-items" v-if="postsExit">
-          <TodoListItem v-for="todo in state.todoItems" :todo="todo" :key="todo.id" :public="todo.public" :id="todo.id" :title="todo.title"
-            :detail="todo.detail" :update-func="() => updateTodo(todo.id)"
+        <div class="todo-items" v-if="todosExit">
+          <TodoListItem v-for="todo in reversedTodos" :todo="todo" :key="todo.id" :public="todo.public" :id="todo.id"
+            :title="todo.title" :detail="todo.detail" :update-func="() => updateTodo(todo.id)"
             :delete-func="() => deleteTodo(todo.id)">
           </TodoListItem>
         </div>
-        <h3 v-else align="center" class="mt-2">No todo Items yet</h3>
+        <div v-else class="no-todos">
+          <h3 align="center" class="mt-2">No todo Items yet</h3>
+          <p align="center"><span class="material-icons-round text-red">task</span></p>
+        </div>
       </main>
     </div>
   </div>
@@ -108,5 +125,8 @@ const postsExit = computed(() => { return state.todoItems.length > 0 })
 
 .ml-2 {
   margin-left: 15px;
+}
+.mr-2{
+  margin-right: 15px;
 }
 </style>
