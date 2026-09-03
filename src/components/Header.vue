@@ -4,16 +4,33 @@ defineProps({ logoText: String, allTodosCount: Number, incompleteTodosCount: Num
 
 <template>
     <header>
-        <nav>
-            <div class="nav-wrapper">
-                <a href="#" class="brand-logo">{{ logoText }} ({{ allTodosCount }})</a>
-                <ul id="nav-mobile" class="right hide-on-med-and-down">
-                    <li><a href="#" class="font-weight-bold">Incomplete Task: {{ incompleteTodosCount }}</a></li>
-                    <li><a href="#" class="font-weight-bold">Complete tasks: {{ completeTodosCount }}</a></li>
+        <nav class="red darken-1">
+            <div class="nav-wrapper container">
+                <a href="#" class="brand-logo" style="padding-left: 16px;">{{ logoText }}</a>
+                <ul class="right">
+                    <li>
+                        <a class="white-text" style="cursor: default;">
+                            <i class="material-icons left">assignment</i>{{ allTodosCount }}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="white-text" style="cursor: default;">
+                            <i class="material-icons left">pending_actions</i>{{ incompleteTodosCount }}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="white-text" style="cursor: default;">
+                            <i class="material-icons left">task_alt</i>{{ completeTodosCount }}
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
     </header>
 </template>
 
-<style scoped></style>
+<style scoped>
+nav {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+</style>
