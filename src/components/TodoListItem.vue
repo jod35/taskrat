@@ -23,20 +23,20 @@ const isOverdue = () => {
         :class="[todo.public ? 'card col l12 m4 s12 hoverable todo-card completed' : 'card col l12 m4 s12 hoverable todo-card incomplete']">
         <div class="card-content">
             <div class="title-row">
-                <span class="card-title white-text" style="font-weight: 500;">{{ title }}</span>
+                <span class="card-title white-text bold">{{ title }}</span>
                 <span class="date-badge created">
-                    <i class="material-icons" style="font-size: 14px; vertical-align: middle;">calendar_today</i>
+                    <i class="material-icons date-icon">calendar_today</i>
                     {{ createdAt }}
                 </span>
             </div>
-            <p class="white-text" style="opacity: 0.9;">{{ detail }}</p>
+            <p class="white-text detail-text">{{ detail }}</p>
             <span :class="['date-badge', 'due', isOverdue() ? 'overdue' : '']">
-                <i class="material-icons" style="font-size: 14px; vertical-align: middle;">event</i>
+                <i class="material-icons date-icon">event</i>
                 Due: {{ dueDate }}
-                <i v-if="isOverdue()" class="material-icons" style="font-size: 14px; vertical-align: middle; margin-left: 2px;">warning</i>
+                <i v-if="isOverdue()" class="material-icons date-icon warning-icon">warning</i>
             </span>
         </div>
-        <div class="card-action" :style="{ background: todo.public ? '#2e7d32' : '#c62828' }">
+        <div :class="['card-action', todo.public ? 'action-complete' : 'action-incomplete']">
             <a @click="updateFunc" class="cursor-pointer waves-effect waves-light btn-flat">
                 <i v-if="public" class="material-icons white-text">remove_done</i>
                 <i v-else class="material-icons white-text">done</i>
@@ -71,6 +71,10 @@ const isOverdue = () => {
     margin-bottom: 8px;
 }
 
+.bold {
+    font-weight: 500;
+}
+
 .title-row .card-title {
     margin: 0;
     flex: 1;
@@ -102,6 +106,27 @@ const isOverdue = () => {
     color: #ffcdd2;
     background: rgba(255, 255, 255, 0.25);
     font-weight: 500;
+}
+
+.date-icon {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.warning-icon {
+    margin-left: 2px;
+}
+
+.detail-text {
+    opacity: 0.9;
+}
+
+.action-complete {
+    background-color: #2e7d32;
+}
+
+.action-incomplete {
+    background-color: #c62828;
 }
 
 .card-action {

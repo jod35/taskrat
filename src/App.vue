@@ -80,17 +80,17 @@ const todosExit = computed(() => { return state.todoItems.length > 0 })
       :complete-todos-count="completeTodosCount" :incomplete-todos-count="incompleteTodosCount" />
 
     <div class="container">
-      <div class="row" style="margin-top: 30px;">
+      <div class="row main-row">
         <aside class="col l4 m12 s12">
-          <div class="card-panel z-depth-1" style="border-radius: 8px;">
-            <h5 class="grey-text text-darken-3" style="margin-top: 0; font-weight: 500;">New Task</h5>
+          <div class="card-panel z-depth-1 sidebar-panel">
+            <h5 class="grey-text text-darken-3 form-title">New Task</h5>
 
-            <a v-if="!state.editing" class="waves-effect waves-light btn red" style="width: 100%; margin-bottom: 12px;"
+            <a v-if="!state.editing" class="waves-effect waves-light btn red full-btn add-btn"
               @click="toggleTodoForm">
               <i class="material-icons left">add</i>Add Task
             </a>
 
-            <form v-if="state.editing" @submit.prevent="submitForm" style="margin-top: 8px;">
+            <form v-if="state.editing" @submit.prevent="submitForm" class="task-form">
               <div class="input-field">
                 <input type="text" id="title" v-model="state.title" class="validate" length="50">
                 <label for="title">Title</label>
@@ -104,20 +104,20 @@ const todosExit = computed(() => { return state.todoItems.length > 0 })
                 <input type="date" id="dueDate" v-model="state.dueDate" required>
                 <label for="dueDate">Due Date</label>
               </div>
-              <div style="display: flex; gap: 10px; margin-top: 16px;">
-                <button type="submit" class="btn waves-effect waves-light red" style="flex: 1;">
+              <div class="form-actions">
+                <button type="submit" class="btn waves-effect waves-light red btn-half">
                   <i class="material-icons left">add_task</i>Add
                 </button>
-                <button type="button" class="btn waves-effect waves-light grey" style="flex: 1;"
+                <button type="button" class="btn waves-effect waves-light grey btn-half"
                   @click="closeTodoForm">
                   Cancel
                 </button>
               </div>
             </form>
 
-            <hr v-if="state.editing" style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+            <hr v-if="state.editing" class="form-divider">
 
-            <a class="waves-effect waves-light btn-flat blue-grey-text" style="width: 100%; margin-top: 4px;"
+            <a class="waves-effect waves-light btn-flat blue-grey-text full-btn reset-btn"
               @click="resetAllTodos">
               <i class="material-icons left">restart_alt</i>Reset All
             </a>
@@ -125,16 +125,16 @@ const todosExit = computed(() => { return state.todoItems.length > 0 })
         </aside>
 
         <main class="col l8 m12 s12">
-          <div v-if="todosExit" class="todo-items-row" style="margin-top: 0;">
+          <div v-if="todosExit" class="todo-items-row">
             <TodoListItem v-for="todo in reversedTodos" :todo="todo" :key="todo.id" :public="todo.public"
               :id="todo.id" :title="todo.title" :detail="todo.detail"
               :created-at="todo.createdAt" :due-date="todo.dueDate"
               :update-func="() => updateTodo(todo.id)" :delete-func="() => deleteTodo(todo.id)" />
           </div>
 
-          <div v-else class="card-panel center-align grey lighten-4" style="border-radius: 8px; padding: 40px 20px;">
-            <i class="material-icons grey-text" style="font-size: 64px;">task_alt</i>
-            <h5 class="grey-text text-darken-1" style="margin-top: 12px;">No tasks yet</h5>
+          <div v-else class="card-panel center-align grey lighten-4 empty-state">
+            <i class="material-icons grey-text empty-icon">task_alt</i>
+            <h5 class="grey-text text-darken-1 empty-title">No tasks yet</h5>
             <p class="grey-text">Click "Add Task" to get started</p>
           </div>
         </main>
@@ -149,19 +149,74 @@ const todosExit = computed(() => { return state.todoItems.length > 0 })
   flex-wrap: wrap;
 }
 
+.main-row {
+  margin-top: 30px;
+}
+
 .row > aside,
 .row > main {
   display: flex;
   flex-direction: column;
 }
 
-.card-panel {
+.sidebar-panel {
   border-radius: 8px;
+}
+
+.form-title {
+  margin-top: 0;
+  font-weight: 500;
+}
+
+.full-btn {
+  width: 100%;
+}
+
+.add-btn {
+  margin-bottom: 12px;
+}
+
+.task-form {
+  margin-top: 8px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn-half {
+  flex: 1;
+}
+
+.form-divider {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #e0e0e0;
+}
+
+.reset-btn {
+  margin-top: 4px;
 }
 
 .todo-items-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-top: 0;
+}
+
+.empty-state {
+  border-radius: 8px;
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  font-size: 64px;
+}
+
+.empty-title {
+  margin-top: 12px;
 }
 </style>
