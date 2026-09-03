@@ -5,6 +5,7 @@ const props = defineProps({
     detail: String,
     createdAt: String,
     dueDate: String,
+    priority: String,
     id: Number,
     updateFunc: Function,
     deleteFunc: Function,
@@ -30,11 +31,16 @@ const isOverdue = () => {
                 </span>
             </div>
             <p class="white-text detail-text">{{ detail }}</p>
-            <span :class="['date-badge', 'due', isOverdue() ? 'overdue' : '']">
-                <i class="material-icons date-icon">event</i>
-                Due: {{ dueDate }}
-                <i v-if="isOverdue()" class="material-icons date-icon warning-icon">warning</i>
-            </span>
+            <div class="card-footer">
+                <span :class="['priority-badge', `priority-${priority}`]">
+                    {{ priority.charAt(0).toUpperCase() + priority.slice(1) }}
+                </span>
+                <span :class="['date-badge', 'due', isOverdue() ? 'overdue' : '']">
+                    <i class="material-icons date-icon">event</i>
+                    Due: {{ dueDate }}
+                    <i v-if="isOverdue()" class="material-icons date-icon warning-icon">warning</i>
+                </span>
+            </div>
         </div>
         <div :class="['card-action', todo.public ? 'action-complete' : 'action-incomplete']">
             <a @click="updateFunc" class="cursor-pointer waves-effect waves-light btn-flat">
@@ -86,8 +92,40 @@ const isOverdue = () => {
     flex-shrink: 0;
 }
 
-.date-badge.due {
+.card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.priority-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.priority-high {
+    background: rgba(255, 255, 255, 0.3);
+    color: #ffcdd2;
+}
+
+.priority-medium {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffe0b2;
+}
+
+.priority-low {
+    background: rgba(255, 255, 255, 0.2);
+    color: #c8e6c9;
+}
+
+.date-badge.due {
+    margin-top: 0;
 }
 
 .date-badge {
