@@ -2,6 +2,7 @@
 import { computed, reactive, nextTick, watch } from 'vue';
 
 import Header from './components/Header.vue';
+import Footer from './components/Footer.vue';
 import TodoListItem from './components/TodoListItem.vue';
 
 const state = reactive({
@@ -13,7 +14,9 @@ const state = reactive({
   editing: false,
   filterPriority: "all",
   filterDue: "all",
-  filterStatus: "all"
+  filterStatus: "all",
+  currentPage: 1,
+  itemsPerPage: 5
 })
 
 function submitForm() {
@@ -84,14 +87,30 @@ function resetAllTodos() {
 
 function setFilterPriority(val) {
   state.filterPriority = val
+  state.currentPage = 1
 }
 
 function setFilterDue(val) {
   state.filterDue = val
+  state.currentPage = 1
 }
 
 function setFilterStatus(val) {
   state.filterStatus = val
+  state.currentPage = 1
+}
+
+function goToPage(page) {
+  const max = Math.ceil(filteredTodos.value.length / state.itemsPerPage)
+  state.currentPage = Math.max(1, Math.min(page, max))
+}
+
+function prevPage() {
+  goToPage(state.currentPage - 1)
+}
+
+function nextPage() {
+  goToPage(state.currentPage + 1)
 }
 
 const allTodosCount = computed(() => { return state.todoItems.length })
@@ -139,17 +158,30 @@ const filteredTodos = computed(() => {
   return [...todos].reverse()
 })
 
+const hasFilteredResults = computed(() => {
+  return filteredTodos.value.length > 0
+})
+
+const totalPages = computed(() => {
+  return Math.ceil(filteredTodos.value.length / state.itemsPerPage)
+})
+
+const paginatedTodos = computed(() => {
+  const start = (state.currentPage - 1) * state.itemsPerPage
+  return filteredTodos.value.slice(start, start + state.itemsPerPage)
+})
+
 const groupedTodos = computed(() => {
   const groups = {
-    high: filteredTodos.value.filter(t => t.priority === "high"),
-    medium: filteredTodos.value.filter(t => t.priority === "medium"),
-    low: filteredTodos.value.filter(t => t.priority === "low")
+    high: paginatedTodos.value.filter(t => t.priority === "high"),
+    medium: paginatedTodos.value.filter(t => t.priority === "medium"),
+    low: paginatedTodos.value.filter(t => t.priority === "low")
   }
   return groups
 })
 
-const hasFilteredResults = computed(() => {
-  return filteredTodos.value.length > 0
+const showPagination = computed(() => {
+  return hasFilteredResults.value
 })
 
 const anyFilterActive = computed(() => {
@@ -158,13 +190,14 @@ const anyFilterActive = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div class="app-shell">
     <Header logo-text="TaskRat" :all-todos-count="allTodosCount"
       :complete-todos-count="completeTodosCount" :incomplete-todos-count="incompleteTodosCount"
       :active-status="state.filterStatus" @filter-status="setFilterStatus" />
 
-    <div class="container">
-      <div class="row main-row">
+    <main class="app-content">
+      <div class="container">
+        <div class="row main-row">
         <aside class="col l4 m12 s12">
           <div class="card-panel z-depth-1 sidebar-panel">
             <h5 class="grey-text text-darken-3 form-title">New Task</h5>
@@ -258,6 +291,18 @@ const anyFilterActive = computed(() => {
             </div>
           </div>
 
+          <div v-if="todosExit && hasFilteredResults && showPagination" class="pagination-controls">
+            <a :class="['waves-effect waves-light btn-flat page-btn', state.currentPage === 1 ? 'disabled' : '']"
+              @click="prevPage">
+              <i class="material-icons">chevron_left</i>Prev
+            </a>
+            <span class="page-info">Page {{ state.currentPage }} of {{ totalPages }}</span>
+            <a :class="['waves-effect waves-light btn-flat page-btn', state.currentPage === totalPages ? 'disabled' : '']"
+              @click="nextPage">
+              Next<i class="material-icons">chevron_right</i>
+            </a>
+          </div>
+
           <div v-else-if="todosExit && !hasFilteredResults && anyFilterActive"
             class="card-panel center-align grey lighten-4 empty-state">
             <i class="material-icons grey-text empty-icon">filter_list_off</i>
@@ -271,12 +316,31 @@ const anyFilterActive = computed(() => {
             <p class="grey-text">Click "Add Task" to get started</p>
           </div>
         </main>
+        </div>
       </div>
-    </div>
+    </main>
+
+    <Footer />
   </div>
 </template>
 
 <style scoped>
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content > .container {
+  flex: 1;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;
@@ -445,6 +509,39 @@ const anyFilterActive = computed(() => {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 0;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 20px;
+  text-transform: none;
+  color: #c62828;
+  font-weight: 500;
+}
+
+.page-btn.disabled {
+  color: #bdbdbd !important;
+  cursor: default;
+}
+
+.page-btn i {
+  font-size: 18px;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: #616161;
 }
 
 .empty-state {
