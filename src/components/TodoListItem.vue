@@ -1,4 +1,6 @@
 <script setup>
+import { useRouter } from 'vue-router';
+
 const props = defineProps({
     public: Boolean,
     title: String,
@@ -12,17 +14,23 @@ const props = defineProps({
     todo: Object
 })
 
+const router = useRouter()
+
 const isOverdue = () => {
     if (props.public || !props.dueDate) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return new Date(props.dueDate) < today;
 }
+
+const goToDetail = () => {
+    router.push(`/todo/${props.id}`)
+}
 </script>
 <template>
     <div
         :class="[todo.public ? 'card col l12 m4 s12 hoverable todo-card completed' : 'card col l12 m4 s12 hoverable todo-card incomplete']">
-        <div class="card-content">
+        <div class="card-content clickable-card" @click="goToDetail">
             <div class="title-row">
                 <span class="card-title white-text bold">{{ title }}</span>
                 <span class="date-badge created">
@@ -62,7 +70,7 @@ const isOverdue = () => {
 }
 
 .incomplete {
-    background-color: #c62828;
+    background-color: #ef5350;
 }
 
 .completed {
@@ -164,7 +172,11 @@ const isOverdue = () => {
 }
 
 .action-incomplete {
-    background-color: #c62828;
+    background-color: #ef5350;
+}
+
+.card-content.clickable-card {
+    cursor: pointer;
 }
 
 .card-action {
