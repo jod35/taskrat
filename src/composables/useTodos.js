@@ -1,4 +1,6 @@
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
+
+const STORAGE_KEY = 'taskrat:todos'
 
 const state = reactive({
   title: "",
@@ -14,6 +16,47 @@ const state = reactive({
   itemsPerPage: 5
 })
 
+function saveTodos() {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.todoItems))
+  } catch (e) {
+    console.warn('Failed to save todos to localStorage', e)
+  }
+}
+
+function loadTodos() {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return
+    // Validate shape – keep only objects that look like a todo
+    const valid = parsed.filter(t => t && typeof t.id === 'number' && typeof t.title === 'string')
+    // Normalize defaults for older persisted data
+    const normalized = valid.map(t => ({
+      title: t.title,
+      detail: t.detail ?? "",
+      createdAt: t.createdAt ?? "",
+      dueDate: t.dueDate ?? "",
+      priority: t.priority ?? "medium",
+      public: t.public ?? false,
+      id: t.id
+    }))
+    state.todoItems.splice(0, state.todoItems.length, ...normalized)
+  } catch (e) {
+    console.warn('Failed to load todos from localStorage', e)
+  }
+}
+
+// Hydrate immediately on module import (client-side)
+loadTodos()
+
+// Persist on any deep change to todoItems – single watcher for the singleton state
+// flush:'sync' ensures storage is updated immediately before user leaves the tab
+watch(() => state.todoItems, saveTodos, { deep: true, flush: 'sync' })
+
 export function useTodos() {
   function submitForm() {
     if (state.title.trim() === "") {
@@ -26,6 +69,7 @@ export function useTodos() {
     }
     const now = new Date();
     const createdAt = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
+    const nextId = state.todoItems.length ? Math.max(...state.todoItems.map(t => t.id)) + 1 : 1
     state.todoItems.push({
       title: state.title,
       detail: state.detail,
@@ -33,7 +77,7 @@ export function useTodos() {
       dueDate: state.dueDate,
       priority: state.priority,
       public: false,
-      id: state.todoItems.length + 1
+      id: nextId
     })
     resetForm()
     return true;

@@ -35,20 +35,23 @@ const goToDetail = () => {
                 <span class="card-title white-text bold">{{ title }}</span>
                 <span class="date-badge created">
                     <i class="material-icons date-icon">calendar_today</i>
-                    {{ createdAt }}
+                    Created: {{ createdAt }}
                 </span>
-            </div>
-            <p class="white-text detail-text">{{ detail }}</p>
-            <div class="card-footer">
-                <span :class="['priority-badge', `priority-${priority}`]">
-                    {{ priority.charAt(0).toUpperCase() + priority.slice(1) }}
-                </span>
+
                 <span :class="['date-badge', 'due', isOverdue() ? 'overdue' : '']">
                     <i class="material-icons date-icon">event</i>
                     Due: {{ dueDate }}
                     <i v-if="isOverdue()" class="material-icons date-icon warning-icon">warning</i>
                 </span>
+                <span :class="['priority-badge', `priority-${priority}`]">
+                    {{ priority.charAt(0).toUpperCase() + priority.slice(1) }}
+                </span>
             </div>
+            <div class="card-footer">
+
+            </div>
+            <p class="white-text detail-text m2">{{ detail }}</p>
+
         </div>
         <div :class="['card-action', todo.public ? 'action-complete' : 'action-incomplete']">
             <a @click="updateFunc" class="cursor-pointer waves-effect waves-light btn-flat">
